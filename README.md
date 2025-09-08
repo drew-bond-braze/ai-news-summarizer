@@ -1,0 +1,161 @@
+# AI News Summarizer
+
+A simple, single-file web application for searching news, generating AI summaries, and exporting to Slack.
+
+## Features
+
+✅ **Search News**: Enter a Braze TAM client name to search for relevant news articles  
+✅ **Select Articles**: Choose one or multiple articles to summarize  
+✅ **AI Summaries**: Generate summaries using a third-party Summary API  
+✅ **Feed View**: View all generated summaries in a clean feed interface  
+✅ **Export to Slack**: Export individual or all summaries to Slack  
+✅ **Search & Filter**: Search through summaries and news articles  
+✅ **Responsive Design**: Works on desktop and mobile devices  
+
+## Setup Instructions
+
+### 1. API Configuration
+
+Before using the app, you need to configure the following APIs in the `CONFIG` object in `index.html`:
+
+```javascript
+const CONFIG = {
+    NEWS_API_KEY: 'YOUR_NEWS_API_KEY',           // Get from newsapi.org
+    NEWS_API_URL: 'https://newsapi.org/v2/everything',
+    SUMMARY_API_URL: 'YOUR_SUMMARY_API_ENDPOINT', // Your Summary API endpoint
+    SLACK_WEBHOOK_URL: 'YOUR_SLACK_WEBHOOK_URL'   // Your Slack webhook URL
+};
+```
+
+### 2. Required API Keys
+
+#### News API
+- Sign up at [newsapi.org](https://newsapi.org)
+- Get your free API key
+- Replace `YOUR_NEWS_API_KEY` in the config
+
+#### Summary API
+- Set up your Summary API endpoint
+- Replace `YOUR_SUMMARY_API_ENDPOINT` in the config
+- Ensure it accepts POST requests with article data
+
+#### Slack Integration
+- Create a Slack webhook in your workspace
+- Replace `YOUR_SLACK_WEBHOOK_URL` in the config
+
+### 3. Running the App
+
+1. Open `index.html` in any modern web browser
+2. Configure your API keys as described above
+3. Start searching for news!
+
+## How to Use
+
+1. **Search**: Enter a Braze TAM client name and click "Search News"
+2. **Select**: Check the boxes next to articles you want to summarize
+3. **Summarize**: Click "Generate Summaries" to create AI summaries
+4. **View**: Browse summaries in the "Generated Summaries" section
+5. **Export**: Export individual summaries or all summaries to Slack
+6. **Feed**: Use the "Summary Feed" to view all your summaries
+
+## API Integration Points
+
+### News Search API
+The app currently uses mock data. To integrate with a real news API:
+
+```javascript
+// Replace mockNewsSearch function with actual API call
+async function searchNews() {
+    const response = await fetch(`${CONFIG.NEWS_API_URL}?q=${clientName}&apiKey=${CONFIG.NEWS_API_KEY}`);
+    const data = await response.json();
+    return data;
+}
+```
+
+### Summary API
+To integrate with your Summary API:
+
+```javascript
+// Replace mockSummaryGeneration function with actual API call
+async function generateSummaries(articles) {
+    const response = await fetch(CONFIG.SUMMARY_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ articles: articles })
+    });
+    return await response.json();
+}
+```
+
+### Slack Export
+To integrate with Slack webhooks:
+
+```javascript
+// Replace mockSlackExport function with actual webhook call
+async function exportToSlack(summary) {
+    await fetch(CONFIG.SLACK_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            text: `*${summary.originalTitle}*\n\n${summary.summary}\n\nSource: ${summary.source}`
+        })
+    });
+}
+```
+
+## File Structure
+
+```
+/
+├── index.html          # Main application file (HTML + CSS + JavaScript)
+├── ARCHITECTURE.md     # Architecture documentation
+└── README.md          # This setup guide
+```
+
+## Browser Compatibility
+
+- Chrome 60+
+- Firefox 55+
+- Safari 12+
+- Edge 79+
+
+## Customization
+
+The app is designed to be easily customizable:
+
+- **Styling**: Modify the CSS in the `<style>` section
+- **Layout**: Adjust the HTML structure in the `<body>` section
+- **Functionality**: Extend the JavaScript functions as needed
+- **APIs**: Replace mock functions with real API integrations
+
+## Security Notes
+
+- Never commit API keys to version control
+- Consider using environment variables for production
+- Implement proper error handling for API failures
+- Add rate limiting for API calls if needed
+
+## Troubleshooting
+
+### Common Issues
+
+1. **CORS Errors**: If testing locally, you may need to serve the file from a web server
+2. **API Key Issues**: Ensure your API keys are correctly configured
+3. **Network Errors**: Check your internet connection and API endpoints
+
+### Development Server
+
+To avoid CORS issues during development, serve the file using a local server:
+
+```bash
+# Using Python
+python -m http.server 8000
+
+# Using Node.js
+npx serve .
+
+# Using PHP
+php -S localhost:8000
+```
+
+Then open `http://localhost:8000` in your browser.
