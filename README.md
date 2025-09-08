@@ -83,6 +83,7 @@ const CONFIG = {
 - ✅ Top 5 most relevant articles
 - ✅ Automatic fallback to mock data if API key not configured
 - ✅ Error handling and user feedback
+- ✅ CORS proxy to bypass News API browser restrictions
 
 ### Summary API
 To integrate with your Summary API:
@@ -155,9 +156,15 @@ The app is designed to be easily customizable:
 
 ### Common Issues
 
-1. **CORS Errors**: If testing locally, you may need to serve the file from a web server
-2. **API Key Issues**: Ensure your API keys are correctly configured
-3. **Network Errors**: Check your internet connection and API endpoints
+1. **426 Upgrade Required Error**: This occurs when News API blocks direct browser requests in production. The app now includes a Vercel serverless function proxy to solve this.
+
+2. **CORS Errors**: If testing locally, you may need to serve the file from a web server
+
+3. **API Key Issues**: Ensure your API keys are correctly configured
+
+4. **Network Errors**: Check your internet connection and API endpoints
+
+5. **No Articles Found**: Try different company names or check if the company has recent news coverage
 
 ### Development Server
 
