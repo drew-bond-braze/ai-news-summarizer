@@ -388,28 +388,51 @@
             // Simulate API delay
             await new Promise(resolve => setTimeout(resolve, 1500));
             
+            // Generate dates for the last 7 days
+            const now = new Date();
+            const dates = [];
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(now);
+                date.setDate(date.getDate() - i);
+                dates.push(date.toISOString());
+            }
+            
             return {
                 articles: [
                     {
-                        title: `${query} announces new AI-powered customer engagement platform`,
-                        description: `The company revealed its latest innovation in customer engagement technology, promising to revolutionize how businesses interact with their customers.`,
+                        title: `${query} launches revolutionary AI-powered customer engagement platform with real-time personalization`,
+                        description: `The company unveiled its next-generation customer engagement suite featuring advanced AI algorithms that deliver personalized experiences at scale. The platform integrates machine learning with behavioral analytics to predict customer needs and optimize engagement strategies across all touchpoints.`,
                         url: 'https://example.com/news1',
-                        publishedAt: '2024-01-15T10:30:00Z',
+                        publishedAt: dates[0], // Today
                         source: { name: 'TechCrunch' }
                     },
                     {
-                        title: `${query} reports record quarterly growth in Q4 2023`,
-                        description: `Strong performance across all business segments drives exceptional growth, with particular strength in enterprise solutions.`,
+                        title: `${query} reports 45% revenue growth in Q4 2023, driven by enterprise AI adoption`,
+                        description: `Strong quarterly performance highlights the company's successful pivot to AI-driven solutions. Enterprise customers are increasingly adopting their platform for customer engagement, with average deal sizes increasing by 60% year-over-year. The company also announced expansion into European markets.`,
                         url: 'https://example.com/news2',
-                        publishedAt: '2024-01-14T15:45:00Z',
+                        publishedAt: dates[1], // Yesterday
                         source: { name: 'Business Wire' }
                     },
                     {
-                        title: `${query} partners with leading cloud providers for enhanced scalability`,
-                        description: `Strategic partnerships announced to provide customers with improved performance and global reach.`,
+                        title: `${query} secures $50M Series C funding to accelerate AI innovation and global expansion`,
+                        description: `The funding round, led by prominent venture capital firms, will fuel research and development in artificial intelligence, machine learning, and customer engagement technologies. The company plans to double its engineering team and expand into Asia-Pacific markets.`,
                         url: 'https://example.com/news3',
-                        publishedAt: '2024-01-13T09:15:00Z',
+                        publishedAt: dates[2], // 2 days ago
+                        source: { name: 'VentureBeat' }
+                    },
+                    {
+                        title: `${query} announces strategic partnership with Microsoft Azure for enhanced cloud scalability`,
+                        description: `The partnership will provide customers with improved performance, global reach, and enterprise-grade security. The integration allows seamless deployment of customer engagement solutions on Azure infrastructure, with built-in compliance and data residency options.`,
+                        url: 'https://example.com/news4',
+                        publishedAt: dates[3], // 3 days ago
                         source: { name: 'PR Newswire' }
+                    },
+                    {
+                        title: `${query} recognized as "Best Customer Engagement Platform" at 2024 MarTech Awards`,
+                        description: `The company received industry recognition for its innovative approach to customer engagement and AI-driven personalization. The award highlights their commitment to helping businesses build meaningful relationships with customers through technology.`,
+                        url: 'https://example.com/news5',
+                        publishedAt: dates[4], // 4 days ago
+                        source: { name: 'MarTech Today' }
                     }
                 ]
             };
@@ -500,15 +523,66 @@
             // Simulate API delay
             await new Promise(resolve => setTimeout(resolve, 2000));
             
-            return articles.map((article, index) => ({
-                id: Date.now() + index,
-                originalTitle: article.title,
-                summary: `This article discusses ${article.title.toLowerCase()}. Key insights include significant developments in the industry, with particular focus on innovation and growth strategies. The content highlights important trends and future outlook for the sector.`,
-                originalUrl: article.url,
-                source: article.source.name,
-                publishedAt: article.publishedAt,
-                generatedAt: new Date().toISOString()
-            }));
+            const summaryTemplates = [
+                {
+                    keyPoints: [
+                        "Revolutionary AI platform launch with real-time personalization capabilities",
+                        "Advanced machine learning algorithms integrated with behavioral analytics",
+                        "Focus on scalable customer engagement across all touchpoints",
+                        "Significant investment in AI-driven customer experience innovation"
+                    ],
+                    businessImpact: "This development positions the company as a leader in AI-powered customer engagement, potentially capturing significant market share in the rapidly growing martech sector."
+                },
+                {
+                    keyPoints: [
+                        "45% revenue growth in Q4 2023 driven by enterprise AI adoption",
+                        "60% increase in average deal sizes year-over-year",
+                        "Successful pivot to AI-driven solutions strategy",
+                        "Expansion into European markets announced"
+                    ],
+                    businessImpact: "Strong financial performance indicates successful market penetration and validates the company's AI-first approach to customer engagement solutions."
+                },
+                {
+                    keyPoints: [
+                        "$50M Series C funding secured from prominent VCs",
+                        "Plans to double engineering team size",
+                        "Expansion into Asia-Pacific markets",
+                        "Focus on AI, ML, and customer engagement R&D"
+                    ],
+                    businessImpact: "Substantial funding enables aggressive growth and innovation, positioning the company for international expansion and technological advancement."
+                },
+                {
+                    keyPoints: [
+                        "Strategic partnership with Microsoft Azure announced",
+                        "Enhanced cloud scalability and global reach",
+                        "Enterprise-grade security and compliance features",
+                        "Seamless deployment options with data residency controls"
+                    ],
+                    businessImpact: "Partnership with Microsoft provides enterprise credibility and technical infrastructure to support large-scale customer deployments."
+                },
+                {
+                    keyPoints: [
+                        "Recognition as 'Best Customer Engagement Platform' at 2024 MarTech Awards",
+                        "Industry validation of innovative AI-driven approach",
+                        "Commitment to building meaningful customer relationships through technology",
+                        "Enhanced brand credibility and market positioning"
+                    ],
+                    businessImpact: "Industry recognition strengthens brand reputation and provides competitive advantage in enterprise sales and partnerships."
+                }
+            ];
+            
+            return articles.map((article, index) => {
+                const template = summaryTemplates[index % summaryTemplates.length];
+                return {
+                    id: Date.now() + index,
+                    originalTitle: article.title,
+                    summary: `**Key Developments:**\n${template.keyPoints.map(point => `• ${point}`).join('\n')}\n\n**Business Impact:**\n${template.businessImpact}\n\n**Strategic Implications:**\nThis news reflects the company's continued focus on AI innovation and market expansion, positioning them as a key player in the evolving customer engagement landscape. The combination of technological advancement, financial growth, and industry recognition suggests strong momentum for future success.`,
+                    originalUrl: article.url,
+                    source: article.source.name,
+                    publishedAt: article.publishedAt,
+                    generatedAt: new Date().toISOString()
+                };
+            });
         }
 
         // Display summary results
@@ -524,7 +598,7 @@
                         <div class="summary-title">${summary.originalTitle}</div>
                         <button class="btn btn-warning" onclick="exportSummary(${summary.id})">Export to Slack</button>
                     </div>
-                    <div class="summary-content">${summary.summary}</div>
+                    <div class="summary-content">${summary.summary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>')}</div>
                     <div class="summary-meta">
                         <span>Source: ${summary.source} | Generated: ${new Date(summary.generatedAt).toLocaleString()}</span>
                         <a href="${summary.originalUrl}" target="_blank" style="color: #667eea;">Read Original</a>
@@ -547,7 +621,7 @@
                         <div class="summary-title">${summary.originalTitle}</div>
                         <button class="btn btn-warning" onclick="exportSummary(${summary.id})">Export to Slack</button>
                     </div>
-                    <div class="summary-content">${summary.summary}</div>
+                    <div class="summary-content">${summary.summary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>')}</div>
                     <div class="summary-meta">
                         <span>Source: ${summary.source} | Generated: ${new Date(summary.generatedAt).toLocaleString()}</span>
                         <a href="${summary.originalUrl}" target="_blank" style="color: #667eea;">Read Original</a>
