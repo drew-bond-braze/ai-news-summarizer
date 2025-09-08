@@ -496,7 +496,7 @@
         const CONFIG = {
             NEWS_API_KEY: '59f4045772a24acead4c904a98c331fc', // News API key
             NEWS_API_URL: 'https://newsapi.org/v2/everything',
-            THIRD_PARTY_API_URL: 'YOUR_THIRD_PARTY_API_ENDPOINT', // Replace with actual 3rd party API endpoint
+            THIRD_PARTY_API_URL: 'https://e69c2c99-3dba-4bf8-82d0-d5b03a5da695.trayapp.io', // Tray endpoint
             SLACK_WEBHOOK_URL: 'YOUR_SLACK_WEBHOOK_URL' // Replace with actual Slack webhook URL
         };
 
@@ -804,7 +804,7 @@
 
                 // Send each article as a separate POST request
                 for (const articleData of metadata) {
-                    await mockSendToThirdParty(articleData);
+                    await sendToTrayAPI(articleData);
                 }
                 
                 // Add to sent articles feed
@@ -832,38 +832,35 @@
             }
         }
 
-        // Mock 3rd party API call - replace with actual API integration
-        async function mockSendToThirdParty(articleData) {
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
+        // Send to Tray API endpoint
+        async function sendToTrayAPI(articleData) {
+            // Log the exact format being sent
+            console.log('Sending POST request to Tray API with data:', JSON.stringify(articleData, null, 2));
             
-            // Log the exact format being sent (replace with actual API call)
-            console.log('Sending POST request to 3rd party API with data:', JSON.stringify(articleData, null, 2));
-            
-            // Simulate actual POST request
-            // Replace this with your actual API endpoint:
-            /*
-            const response = await fetch(CONFIG.THIRD_PARTY_API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(articleData)
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            try {
+                // Send actual POST request to Tray endpoint
+                const response = await fetch(CONFIG.THIRD_PARTY_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(articleData)
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Tray API error:', response.status, errorText);
+                    throw new Error(`Tray API error: ${response.status} ${response.statusText} - ${errorText}`);
+                }
+                
+                const result = await response.json();
+                console.log('Tray API response:', result);
+                return result;
+                
+            } catch (error) {
+                console.error('Failed to send to Tray API:', error);
+                throw error;
             }
-            
-            return await response.json();
-            */
-            
-            // Simulate API response
-            return {
-                success: true,
-                message: 'Article metadata successfully sent',
-                data: articleData
-            };
         }
 
         // Display metadata preview
