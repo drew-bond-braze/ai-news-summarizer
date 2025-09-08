@@ -836,10 +836,13 @@
         async function sendToTrayAPI(articleData) {
             // Log the exact format being sent
             console.log('Sending POST request to Tray API with data:', JSON.stringify(articleData, null, 2));
+            console.log('Using API URL:', CONFIG.THIRD_PARTY_API_URL);
             
             try {
                 // Send actual POST request to Tray endpoint
-                const response = await fetch(CONFIG.THIRD_PARTY_API_URL, {
+                const apiUrl = CONFIG.THIRD_PARTY_API_URL + '?t=' + Date.now(); // Cache busting
+                console.log('Final API URL with cache busting:', apiUrl);
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
