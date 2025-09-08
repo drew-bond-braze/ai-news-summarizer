@@ -71,9 +71,8 @@
         }
 
         .search-container {
-            max-width: 500px;
+            max-width: 600px;
             margin: 0 auto 2rem;
-            position: relative;
         }
 
         .input-group {
@@ -86,7 +85,6 @@
         .input-group input {
             flex: 1;
             padding: 0.75rem 1rem;
-            padding-right: 3rem;
             border: 2px solid #f3f6ff;
             border-radius: 25px;
             font-size: 1rem;
@@ -116,17 +114,9 @@
         .btn-primary {
             background: #801ed7;
             color: white;
-            position: absolute;
-            right: 0.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            border-radius: 50%;
-            width: 2.5rem;
-            height: 2.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
+            border-radius: 25px;
+            padding: 0.75rem 1.5rem;
+            white-space: nowrap;
         }
 
         .btn-primary:hover {
@@ -360,15 +350,6 @@
                 gap: 0.5rem;
             }
             
-            .btn-primary {
-                position: static;
-                transform: none;
-                width: auto;
-                height: auto;
-                padding: 0.75rem 1.5rem;
-                border-radius: 25px;
-            }
-            
             .news-grid {
                 grid-template-columns: 1fr;
             }
@@ -394,7 +375,7 @@
                 <div class="search-container">
                     <div class="input-group">
                         <input type="text" id="clientInput" placeholder="Enter company name..." />
-                        <button class="btn btn-primary" onclick="searchNews()">🔍</button>
+                        <button class="btn btn-primary" onclick="searchNews()">Search</button>
                     </div>
                     <div style="text-align: center; font-size: 0.9rem; color: #4b5563; margin-bottom: 1rem;">
                         💡 <strong>Tip:</strong> Enter company names like "Apple", "Microsoft", "Tesla" to search for marketing-related news articles from the last 7 days
