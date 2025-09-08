@@ -50,6 +50,11 @@ const CONFIG = {
 2. Configure your API keys as described above
 3. Start searching for news!
 
+**Test with real companies:**
+- Try "Apple", "Microsoft", "Tesla", "OpenAI"
+- The app will fetch real news articles from the last 7 days
+- Preview metadata before sending to your 3rd party API
+
 ## How to Use
 
 1. **Search**: Enter a Braze TAM client name and click "Search News"
@@ -137,10 +142,14 @@ The app is designed to be easily customizable:
 
 ## Security Notes
 
-- Never commit API keys to version control
-- Consider using environment variables for production
-- Implement proper error handling for API failures
-- Add rate limiting for API calls if needed
+⚠️ **IMPORTANT**: This repository contains a News API key for demonstration purposes. In production:
+
+- **Never commit API keys to version control**
+- **Use environment variables** for production deployments
+- **Rotate API keys regularly**
+- **Implement proper error handling** for API failures
+- **Add rate limiting** for API calls if needed
+- **Consider using Vercel environment variables** for secure key management
 
 ## Troubleshooting
 
