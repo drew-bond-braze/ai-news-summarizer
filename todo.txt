@@ -1,0 +1,2 @@
+* beautify
+* select ability to send to Slack, Sheets, or Both as the Destination value.
