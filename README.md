@@ -52,7 +52,8 @@ const CONFIG = {
 
 **Test with real companies:**
 - Try "Apple", "Microsoft", "Tesla", "OpenAI"
-- The app will fetch real news articles from the last 7 days
+- The app will fetch marketing-related news articles from the last 7 days
+- Focuses on marketing, customer engagement, brand, advertising, and growth news
 - Preview metadata before sending to your 3rd party API
 
 ## How to Use
@@ -79,8 +80,9 @@ const CONFIG = {
 ```
 
 **Features:**
-- ✅ Real news articles from the last 7 days
-- ✅ Top 5 most relevant articles
+- ✅ Marketing-focused news articles from the last 7 days
+- ✅ Top 5 most relevant marketing articles
+- ✅ Searches for marketing, customer engagement, brand, advertising, and growth news
 - ✅ Automatic fallback to mock data if API key not configured
 - ✅ Error handling and user feedback
 - ✅ CORS proxy to bypass News API browser restrictions

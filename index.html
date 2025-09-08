@@ -300,7 +300,7 @@
                     <button class="btn btn-primary" onclick="searchNews()">Search News</button>
                 </div>
                 <div style="margin-top: 10px; font-size: 0.9rem; color: #6c757d;">
-                    💡 <strong>Tip:</strong> Enter company names like "Apple", "Microsoft", "Tesla" to search for real news articles from the last 7 days
+                    💡 <strong>Tip:</strong> Enter company names like "Apple", "Microsoft", "Tesla" to search for marketing-related news articles from the last 7 days
                 </div>
                 <div style="margin-top: 10px;">
                     <button class="btn btn-secondary" onclick="testNewsAPI()" style="font-size: 0.8rem; padding: 8px 16px;">
@@ -316,7 +316,7 @@
 
             <!-- News Results Section -->
             <div class="section" id="newsSection" style="display: none;">
-                <h2>📰 News Results</h2>
+                <h2>📰 Marketing News Results</h2>
                 <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;">
                     <button class="btn btn-secondary" onclick="selectAllNews()">Select All</button>
                     <button class="btn btn-secondary" onclick="deselectAllNews()">Deselect All</button>
@@ -374,7 +374,7 @@
 
         // Test function to quickly test News API
         async function testNewsAPI() {
-            console.log('🧪 Testing News API with Apple...');
+            console.log('🧪 Testing News API with Apple marketing news...');
             document.getElementById('clientInput').value = 'Apple';
             await searchNews();
         }
@@ -430,16 +430,16 @@
                 
                 console.log('📅 Searching from date:', fromDateStr);
                 
-                // Build search query - search for the company name in title and description
-                const searchQuery = `${query} OR "${query}"`;
-                console.log('🔎 Search query:', searchQuery);
+                // Build search query - focus on marketing news for the company
+                const searchQuery = `(${query} OR "${query}") AND (marketing OR "customer engagement" OR "brand" OR "advertising" OR "campaign" OR "digital marketing" OR "social media" OR "content marketing" OR "email marketing" OR "growth" OR "revenue" OR "sales")`;
+                console.log('🔎 Marketing-focused search query:', searchQuery);
                 
                 // Use our Vercel proxy instead of direct News API call
                 const proxyUrl = `/api/news?` +
                     `q=${encodeURIComponent(searchQuery)}&` +
                     `from=${fromDateStr}&` +
                     `sortBy=relevancy&` +
-                    `pageSize=1&` +
+                    `pageSize=5&` +
                     `language=en`;
                 
                 console.log('🌐 Proxy URL:', proxyUrl);
@@ -476,7 +476,7 @@
                         console.log('✅ Article valid:', hasRequiredFields, article.title);
                         return hasRequiredFields;
                     })
-                    .slice(0, 1) // Take just 1 for testing
+                    .slice(0, 5) // Take top 5 marketing articles
                     .map(article => {
                         const formattedArticle = {
                             title: article.title,
