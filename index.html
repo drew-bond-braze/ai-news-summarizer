@@ -299,6 +299,9 @@
                     <input type="text" id="clientInput" placeholder="Enter Braze TAM client name..." />
                     <button class="btn btn-primary" onclick="searchNews()">Search News</button>
                 </div>
+                <div style="margin-top: 10px; font-size: 0.9rem; color: #6c757d;">
+                    💡 <strong>Tip:</strong> Enter company names like "Apple", "Microsoft", "Tesla" to search for real news articles from the last 7 days
+                </div>
                 <div class="loading" id="searchLoading">
                     <div class="spinner"></div>
                     <p>Searching for news...</p>
@@ -376,8 +379,14 @@
             hideError('searchError');
 
             try {
-                // Simulate API call - replace with actual News API integration
-                const response = await mockNewsSearch(clientName);
+                // Try real News API first, fallback to mock if not configured
+                let response;
+                if (CONFIG.NEWS_API_KEY && CONFIG.NEWS_API_KEY !== 'YOUR_NEWS_API_KEY') {
+                    response = await searchNewsAPI(clientName);
+                } else {
+                    response = await mockNewsSearch(clientName);
+                }
+                
                 currentNews = response.articles;
                 displayNewsResults();
                 showSection('newsSection');
@@ -388,7 +397,64 @@
             }
         }
 
-        // Mock news search function - replace with actual API call
+        // Real news search function using News API
+        async function searchNewsAPI(query) {
+            try {
+                // Get articles from the last 7 days
+                const fromDate = new Date();
+                fromDate.setDate(fromDate.getDate() - 7);
+                const fromDateStr = fromDate.toISOString().split('T')[0];
+                
+                // Build search query - search for the company name in title and description
+                const searchQuery = `${query} OR "${query}"`;
+                
+                const response = await fetch(
+                    `${CONFIG.NEWS_API_URL}?` +
+                    `q=${encodeURIComponent(searchQuery)}&` +
+                    `from=${fromDateStr}&` +
+                    `sortBy=relevancy&` +
+                    `pageSize=5&` +
+                    `language=en&` +
+                    `apiKey=${CONFIG.NEWS_API_KEY}`
+                );
+                
+                if (!response.ok) {
+                    throw new Error(`News API error: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.status !== 'ok') {
+                    throw new Error(`News API returned error: ${data.message || 'Unknown error'}`);
+                }
+                
+                // Filter and format the results
+                const articles = data.articles
+                    .filter(article => 
+                        article.title && 
+                        article.description && 
+                        article.url && 
+                        article.publishedAt &&
+                        article.source?.name
+                    )
+                    .slice(0, 5) // Take top 5
+                    .map(article => ({
+                        title: article.title,
+                        description: article.description,
+                        url: article.url,
+                        publishedAt: article.publishedAt,
+                        source: { name: article.source.name }
+                    }));
+                
+                return { articles };
+                
+            } catch (error) {
+                console.error('News API Error:', error);
+                throw new Error(`Failed to fetch news: ${error.message}`);
+            }
+        }
+
+        // Fallback mock function for when News API is not configured
         async function mockNewsSearch(query) {
             // Simulate API delay
             await new Promise(resolve => setTimeout(resolve, 1500));

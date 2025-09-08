@@ -29,10 +29,11 @@ const CONFIG = {
 
 ### 2. Required API Keys
 
-#### News API
-- Sign up at [newsapi.org](https://newsapi.org)
-- Get your free API key
+#### News API (Required for Real News Search)
+- Sign up at [newsapi.org](https://newsapi.org) (free tier available)
+- Get your free API key from the dashboard
 - Replace `YOUR_NEWS_API_KEY` in the config
+- **Free tier includes**: 1,000 requests per month, articles from last 30 days
 
 #### Summary API
 - Set up your Summary API endpoint
@@ -61,16 +62,22 @@ const CONFIG = {
 ## API Integration Points
 
 ### News Search API
-The app currently uses mock data. To integrate with a real news API:
+The app now includes real News API integration! Just add your API key:
 
 ```javascript
-// Replace mockNewsSearch function with actual API call
-async function searchNews() {
-    const response = await fetch(`${CONFIG.NEWS_API_URL}?q=${clientName}&apiKey=${CONFIG.NEWS_API_KEY}`);
-    const data = await response.json();
-    return data;
-}
+// Already implemented - just add your API key to CONFIG
+const CONFIG = {
+    NEWS_API_KEY: 'your-actual-api-key-here', // Get from newsapi.org
+    NEWS_API_URL: 'https://newsapi.org/v2/everything',
+    // ... other config
+};
 ```
+
+**Features:**
+- ✅ Real news articles from the last 7 days
+- ✅ Top 5 most relevant articles
+- ✅ Automatic fallback to mock data if API key not configured
+- ✅ Error handling and user feedback
 
 ### Summary API
 To integrate with your Summary API:
