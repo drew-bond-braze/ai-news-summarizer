@@ -785,23 +785,38 @@
             showLoading('metadataLoading');
 
             try {
-                // Generate metadata for selected articles
+                // Get the account name from the search input
+                const accountName = document.getElementById('clientInput').value.trim() || 'Unknown Company';
+                
+                // Generate metadata in the required format
                 const metadata = selectedArticles.map(article => ({
+                    "Account Name": accountName,
+                    "Article Title": article.title,
+                    "Article Summary": article.description,
+                    "Article Date": new Date(article.publishedAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    }),
+                    "URL": article.url,
+                    "Slack Message": "Slack"
+                }));
+
+                // Send each article as a separate POST request
+                for (const articleData of metadata) {
+                    await mockSendToThirdParty(articleData);
+                }
+                
+                // Add to sent articles feed
+                const sentArticles = selectedArticles.map((article, index) => ({
                     title: article.title,
                     date: new Date(article.publishedAt).toLocaleDateString(),
                     url: article.url,
                     website: article.source.name,
                     publishedAt: article.publishedAt,
-                    description: article.description
-                }));
-
-                // Simulate API call - replace with actual 3rd party API integration
-                await mockSendToThirdParty(metadata);
-                
-                // Add to sent articles feed
-                const sentArticles = metadata.map(item => ({
-                    ...item,
-                    id: Date.now() + Math.random(),
+                    description: article.description,
+                    accountName: accountName,
+                    id: Date.now() + Math.random() + index,
                     sentAt: new Date().toISOString()
                 }));
                 
@@ -818,18 +833,36 @@
         }
 
         // Mock 3rd party API call - replace with actual API integration
-        async function mockSendToThirdParty(metadata) {
+        async function mockSendToThirdParty(articleData) {
             // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            await new Promise(resolve => setTimeout(resolve, 1000));
             
-            // Log the metadata being sent (replace with actual API call)
-            console.log('Sending metadata to 3rd party API:', metadata);
+            // Log the exact format being sent (replace with actual API call)
+            console.log('Sending POST request to 3rd party API with data:', JSON.stringify(articleData, null, 2));
+            
+            // Simulate actual POST request
+            // Replace this with your actual API endpoint:
+            /*
+            const response = await fetch(CONFIG.THIRD_PARTY_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(articleData)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return await response.json();
+            */
             
             // Simulate API response
             return {
                 success: true,
-                message: 'Metadata successfully sent',
-                receivedCount: metadata.length
+                message: 'Article metadata successfully sent',
+                data: articleData
             };
         }
 
@@ -838,7 +871,15 @@
             const container = document.getElementById('metadataPreview');
             container.innerHTML = '';
 
+            const accountName = document.getElementById('clientInput').value.trim() || 'Unknown Company';
+
             currentMetadata.forEach(metadata => {
+                const formattedDate = new Date(metadata.publishedAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
                 const metadataDiv = document.createElement('div');
                 metadataDiv.className = 'summary-item';
                 metadataDiv.innerHTML = `
@@ -846,13 +887,22 @@
                         <div class="summary-title">${metadata.title}</div>
                     </div>
                     <div class="summary-content">
-                        <div style="margin-bottom: 10px;"><strong>Date:</strong> ${metadata.date}</div>
-                        <div style="margin-bottom: 10px;"><strong>Website:</strong> ${metadata.website}</div>
-                        <div style="margin-bottom: 10px;"><strong>URL:</strong> <a href="${metadata.url}" target="_blank" style="color: #667eea;">${metadata.url}</a></div>
-                        <div style="margin-bottom: 10px;"><strong>Description:</strong> ${metadata.description}</div>
+                        <div style="margin-bottom: 15px; padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #801ed7;">
+                            <h4 style="margin-bottom: 10px; color: #1e293b;">JSON Format to be sent:</h4>
+                            <pre style="background: #1e293b; color: #e2e8f0; padding: 15px; border-radius: 6px; font-size: 0.85rem; overflow-x: auto; margin: 0;">{
+  "Account Name": "${accountName}",
+  "Article Title": "${metadata.title}",
+  "Article Summary": "${metadata.description}",
+  "Article Date": "${formattedDate}",
+  "URL": "${metadata.url}",
+  "Slack Message": "Slack"
+}</pre>
+                        </div>
+                        <div style="margin-bottom: 10px;"><strong>Source:</strong> ${metadata.website}</div>
+                        <div style="margin-bottom: 10px;"><strong>URL:</strong> <a href="${metadata.url}" target="_blank" style="color: #801ed7;">${metadata.url}</a></div>
                     </div>
                     <div class="summary-meta">
-                        <span>Metadata Preview - Ready to Send</span>
+                        <span>Ready to send as POST request</span>
                     </div>
                 `;
                 container.appendChild(metadataDiv);
