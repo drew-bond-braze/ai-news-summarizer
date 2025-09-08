@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI News Summarizer</title>
+    <title>Braze AI News Intelligence</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00B4D8 0%, #0077B6 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -28,10 +28,11 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00B4D8 0%, #0077B6 100%);
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
         }
 
         .header h1 {
@@ -82,7 +83,7 @@
 
         .input-group input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #00B4D8;
         }
 
         .btn {
@@ -98,13 +99,13 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00B4D8 0%, #0077B6 100%);
             color: white;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 20px rgba(0, 180, 216, 0.3);
         }
 
         .btn-secondary {
@@ -136,7 +137,7 @@
 
         .spinner {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            border-top: 4px solid #00B4D8;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -164,8 +165,8 @@
         }
 
         .news-item.selected {
-            border-color: #667eea;
-            background: #f8f9ff;
+            border-color: #00B4D8;
+            background: #f0f9ff;
         }
 
         .news-checkbox {
@@ -287,8 +288,17 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🤖 AI News Summarizer</h1>
-            <p>Search news, generate summaries, and export to Slack</p>
+            <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                <div style="background: white; border-radius: 12px; padding: 8px 16px; margin-right: 15px;">
+                    <span style="color: #0077B6; font-weight: 700; font-size: 1.2rem;">BRAZE</span>
+                </div>
+                <div style="font-size: 1.5rem;">📰</div>
+            </div>
+            <h1>AI News Intelligence</h1>
+            <p>Discover marketing insights, track brand mentions, and analyze customer engagement trends</p>
+            <div style="margin-top: 15px; font-size: 0.9rem; opacity: 0.9;">
+                Powered by Braze Customer Engagement Platform
+            </div>
         </div>
 
         <div class="main-content">
@@ -300,7 +310,7 @@
                     <button class="btn btn-primary" onclick="searchNews()">Search News</button>
                 </div>
                 <div style="margin-top: 10px; font-size: 0.9rem; color: #6c757d;">
-                    💡 <strong>Tip:</strong> Enter company names like "Apple", "Microsoft", "Tesla" to search for marketing-related news articles from the last 7 days
+                    💡 <strong>Tip:</strong> Enter company names like "Apple", "Microsoft", "Tesla" to discover marketing insights and customer engagement trends from the last 7 days
                 </div>
                 <div style="margin-top: 10px;">
                     <button class="btn btn-secondary" onclick="testNewsAPI()" style="font-size: 0.8rem; padding: 8px 16px;">
@@ -316,7 +326,7 @@
 
             <!-- News Results Section -->
             <div class="section" id="newsSection" style="display: none;">
-                <h2>📰 Marketing News Results</h2>
+                <h2>📰 Marketing Intelligence Results</h2>
                 <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;">
                     <button class="btn btn-secondary" onclick="selectAllNews()">Select All</button>
                     <button class="btn btn-secondary" onclick="deselectAllNews()">Deselect All</button>
@@ -336,7 +346,7 @@
 
             <!-- Metadata Preview Section -->
             <div class="section" id="metadataSection" style="display: none;">
-                <h2>👁️ Metadata Preview</h2>
+                <h2>👁️ Intelligence Preview</h2>
                 <div class="feed-controls">
                     <button class="btn btn-success" onclick="sendMetadata()" id="sendFromPreviewBtn">
                         Send to 3rd Party (<span id="previewSelectedCount">0</span>)
@@ -348,7 +358,7 @@
 
             <!-- Sent Articles Feed Section -->
             <div class="section" id="feedSection" style="display: none;">
-                <h2>📋 Sent Articles Feed</h2>
+                <h2>📋 Intelligence Archive</h2>
                 <div class="feed-controls">
                     <input type="text" class="search-box" id="feedSearch" placeholder="Search sent articles..." onkeyup="filterFeed()" />
                     <button class="btn btn-warning" onclick="exportAllToSlack()">Export All to Slack</button>
@@ -709,7 +719,7 @@
                     <div class="summary-content">
                         <div style="margin-bottom: 10px;"><strong>Date:</strong> ${metadata.date}</div>
                         <div style="margin-bottom: 10px;"><strong>Website:</strong> ${metadata.website}</div>
-                        <div style="margin-bottom: 10px;"><strong>URL:</strong> <a href="${metadata.url}" target="_blank" style="color: #667eea;">${metadata.url}</a></div>
+                        <div style="margin-bottom: 10px;"><strong>URL:</strong> <a href="${metadata.url}" target="_blank" style="color: #00B4D8;">${metadata.url}</a></div>
                         <div style="margin-bottom: 10px;"><strong>Description:</strong> ${metadata.description}</div>
                     </div>
                     <div class="summary-meta">
@@ -736,7 +746,7 @@
                     <div class="summary-content">
                         <div style="margin-bottom: 10px;"><strong>Date:</strong> ${article.date}</div>
                         <div style="margin-bottom: 10px;"><strong>Website:</strong> ${article.website}</div>
-                        <div style="margin-bottom: 10px;"><strong>URL:</strong> <a href="${article.url}" target="_blank" style="color: #667eea;">${article.url}</a></div>
+                        <div style="margin-bottom: 10px;"><strong>URL:</strong> <a href="${article.url}" target="_blank" style="color: #00B4D8;">${article.url}</a></div>
                         <div style="margin-bottom: 10px;"><strong>Description:</strong> ${article.description}</div>
                     </div>
                     <div class="summary-meta">
