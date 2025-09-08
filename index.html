@@ -312,33 +312,38 @@
                 <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;">
                     <button class="btn btn-secondary" onclick="selectAllNews()">Select All</button>
                     <button class="btn btn-secondary" onclick="deselectAllNews()">Deselect All</button>
-                    <button class="btn btn-success" onclick="generateSummaries()" id="summarizeBtn" disabled>
-                        Generate Summaries (<span id="selectedCount">0</span>)
+                    <button class="btn btn-warning" onclick="previewMetadata()" id="previewBtn" disabled>
+                        Preview Metadata (<span id="selectedCount">0</span>)
+                    </button>
+                    <button class="btn btn-success" onclick="sendMetadata()" id="sendBtn" disabled>
+                        Send to 3rd Party (<span id="selectedCount2">0</span>)
                     </button>
                 </div>
                 <div id="newsResults"></div>
-                <div class="loading" id="summaryLoading">
+                <div class="loading" id="metadataLoading">
                     <div class="spinner"></div>
-                    <p>Generating summaries...</p>
+                    <p>Sending metadata...</p>
                 </div>
             </div>
 
-            <!-- Summary Results Section -->
-            <div class="section" id="summarySection" style="display: none;">
-                <h2>📝 Generated Summaries</h2>
+            <!-- Metadata Preview Section -->
+            <div class="section" id="metadataSection" style="display: none;">
+                <h2>👁️ Metadata Preview</h2>
                 <div class="feed-controls">
-                    <input type="text" class="search-box" id="summarySearch" placeholder="Search summaries..." onkeyup="filterSummaries()" />
-                    <button class="btn btn-warning" onclick="exportAllSummaries()">Export All to Slack</button>
+                    <button class="btn btn-success" onclick="sendMetadata()" id="sendFromPreviewBtn">
+                        Send to 3rd Party (<span id="previewSelectedCount">0</span>)
+                    </button>
+                    <button class="btn btn-secondary" onclick="closePreview()">Close Preview</button>
                 </div>
-                <div id="summaryResults"></div>
+                <div id="metadataPreview"></div>
             </div>
 
-            <!-- Feed View Section -->
+            <!-- Sent Articles Feed Section -->
             <div class="section" id="feedSection" style="display: none;">
-                <h2>📋 Summary Feed</h2>
+                <h2>📋 Sent Articles Feed</h2>
                 <div class="feed-controls">
-                    <input type="text" class="search-box" id="feedSearch" placeholder="Search feed..." onkeyup="filterFeed()" />
-                    <button class="btn btn-warning" onclick="exportAllSummaries()">Export All to Slack</button>
+                    <input type="text" class="search-box" id="feedSearch" placeholder="Search sent articles..." onkeyup="filterFeed()" />
+                    <button class="btn btn-warning" onclick="exportAllToSlack()">Export All to Slack</button>
                 </div>
                 <div id="feedResults"></div>
             </div>
@@ -348,14 +353,14 @@
     <script>
         // Global state
         let currentNews = [];
-        let currentSummaries = [];
-        let allSummaries = [];
+        let currentMetadata = [];
+        let allSentArticles = [];
 
         // Configuration - Replace with your actual API endpoints and keys
         const CONFIG = {
             NEWS_API_KEY: 'YOUR_NEWS_API_KEY', // Replace with actual News API key
             NEWS_API_URL: 'https://newsapi.org/v2/everything',
-            SUMMARY_API_URL: 'YOUR_SUMMARY_API_ENDPOINT', // Replace with actual Summary API endpoint
+            THIRD_PARTY_API_URL: 'YOUR_THIRD_PARTY_API_ENDPOINT', // Replace with actual 3rd party API endpoint
             SLACK_WEBHOOK_URL: 'YOUR_SLACK_WEBHOOK_URL' // Replace with actual Slack webhook URL
         };
 
@@ -468,7 +473,9 @@
             const checkboxes = document.querySelectorAll('.news-checkbox:checked');
             const count = checkboxes.length;
             document.getElementById('selectedCount').textContent = count;
-            document.getElementById('summarizeBtn').disabled = count === 0;
+            document.getElementById('selectedCount2').textContent = count;
+            document.getElementById('previewBtn').disabled = count === 0;
+            document.getElementById('sendBtn').disabled = count === 0;
         }
 
         // Select all news items
@@ -487,8 +494,8 @@
             updateSelectedCount();
         }
 
-        // Generate summaries for selected articles
-        async function generateSummaries() {
+        // Preview metadata for selected articles
+        function previewMetadata() {
             const selectedCheckboxes = document.querySelectorAll('.news-checkbox:checked');
             const selectedArticles = Array.from(selectedCheckboxes).map(cb => 
                 currentNews[parseInt(cb.dataset.index)]
@@ -499,112 +506,107 @@
                 return;
             }
 
-            showLoading('summaryLoading');
+            // Generate metadata for selected articles
+            currentMetadata = selectedArticles.map(article => ({
+                id: Date.now() + Math.random(),
+                title: article.title,
+                date: new Date(article.publishedAt).toLocaleDateString(),
+                url: article.url,
+                website: article.source.name,
+                publishedAt: article.publishedAt,
+                description: article.description
+            }));
+
+            displayMetadataPreview();
+            showSection('metadataSection');
+        }
+
+        // Send metadata to 3rd party API
+        async function sendMetadata() {
+            const selectedCheckboxes = document.querySelectorAll('.news-checkbox:checked');
+            const selectedArticles = Array.from(selectedCheckboxes).map(cb => 
+                currentNews[parseInt(cb.dataset.index)]
+            );
+
+            if (selectedArticles.length === 0) {
+                showError('searchError', 'Please select at least one article');
+                return;
+            }
+
+            showLoading('metadataLoading');
 
             try {
-                // Simulate API call - replace with actual Summary API integration
-                const summaries = await mockSummaryGeneration(selectedArticles);
-                currentSummaries = summaries;
-                allSummaries = [...allSummaries, ...summaries];
+                // Generate metadata for selected articles
+                const metadata = selectedArticles.map(article => ({
+                    title: article.title,
+                    date: new Date(article.publishedAt).toLocaleDateString(),
+                    url: article.url,
+                    website: article.source.name,
+                    publishedAt: article.publishedAt,
+                    description: article.description
+                }));
+
+                // Simulate API call - replace with actual 3rd party API integration
+                await mockSendToThirdParty(metadata);
                 
-                displaySummaryResults();
+                // Add to sent articles feed
+                const sentArticles = metadata.map(item => ({
+                    ...item,
+                    id: Date.now() + Math.random(),
+                    sentAt: new Date().toISOString()
+                }));
+                
+                allSentArticles = [...allSentArticles, ...sentArticles];
                 updateFeed();
-                showSection('summarySection');
                 showSection('feedSection');
+                
+                showSuccess(`Successfully sent ${metadata.length} article(s) to 3rd party service!`);
             } catch (error) {
-                showError('searchError', 'Failed to generate summaries: ' + error.message);
+                showError('searchError', 'Failed to send metadata: ' + error.message);
             } finally {
-                hideLoading('summaryLoading');
+                hideLoading('metadataLoading');
             }
         }
 
-        // Mock summary generation - replace with actual API call
-        async function mockSummaryGeneration(articles) {
+        // Mock 3rd party API call - replace with actual API integration
+        async function mockSendToThirdParty(metadata) {
             // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise(resolve => setTimeout(resolve, 1500));
             
-            const summaryTemplates = [
-                {
-                    keyPoints: [
-                        "Revolutionary AI platform launch with real-time personalization capabilities",
-                        "Advanced machine learning algorithms integrated with behavioral analytics",
-                        "Focus on scalable customer engagement across all touchpoints",
-                        "Significant investment in AI-driven customer experience innovation"
-                    ],
-                    businessImpact: "This development positions the company as a leader in AI-powered customer engagement, potentially capturing significant market share in the rapidly growing martech sector."
-                },
-                {
-                    keyPoints: [
-                        "45% revenue growth in Q4 2023 driven by enterprise AI adoption",
-                        "60% increase in average deal sizes year-over-year",
-                        "Successful pivot to AI-driven solutions strategy",
-                        "Expansion into European markets announced"
-                    ],
-                    businessImpact: "Strong financial performance indicates successful market penetration and validates the company's AI-first approach to customer engagement solutions."
-                },
-                {
-                    keyPoints: [
-                        "$50M Series C funding secured from prominent VCs",
-                        "Plans to double engineering team size",
-                        "Expansion into Asia-Pacific markets",
-                        "Focus on AI, ML, and customer engagement R&D"
-                    ],
-                    businessImpact: "Substantial funding enables aggressive growth and innovation, positioning the company for international expansion and technological advancement."
-                },
-                {
-                    keyPoints: [
-                        "Strategic partnership with Microsoft Azure announced",
-                        "Enhanced cloud scalability and global reach",
-                        "Enterprise-grade security and compliance features",
-                        "Seamless deployment options with data residency controls"
-                    ],
-                    businessImpact: "Partnership with Microsoft provides enterprise credibility and technical infrastructure to support large-scale customer deployments."
-                },
-                {
-                    keyPoints: [
-                        "Recognition as 'Best Customer Engagement Platform' at 2024 MarTech Awards",
-                        "Industry validation of innovative AI-driven approach",
-                        "Commitment to building meaningful customer relationships through technology",
-                        "Enhanced brand credibility and market positioning"
-                    ],
-                    businessImpact: "Industry recognition strengthens brand reputation and provides competitive advantage in enterprise sales and partnerships."
-                }
-            ];
+            // Log the metadata being sent (replace with actual API call)
+            console.log('Sending metadata to 3rd party API:', metadata);
             
-            return articles.map((article, index) => {
-                const template = summaryTemplates[index % summaryTemplates.length];
-                return {
-                    id: Date.now() + index,
-                    originalTitle: article.title,
-                    summary: `**Key Developments:**\n${template.keyPoints.map(point => `• ${point}`).join('\n')}\n\n**Business Impact:**\n${template.businessImpact}\n\n**Strategic Implications:**\nThis news reflects the company's continued focus on AI innovation and market expansion, positioning them as a key player in the evolving customer engagement landscape. The combination of technological advancement, financial growth, and industry recognition suggests strong momentum for future success.`,
-                    originalUrl: article.url,
-                    source: article.source.name,
-                    publishedAt: article.publishedAt,
-                    generatedAt: new Date().toISOString()
-                };
-            });
+            // Simulate API response
+            return {
+                success: true,
+                message: 'Metadata successfully sent',
+                receivedCount: metadata.length
+            };
         }
 
-        // Display summary results
-        function displaySummaryResults() {
-            const container = document.getElementById('summaryResults');
+        // Display metadata preview
+        function displayMetadataPreview() {
+            const container = document.getElementById('metadataPreview');
             container.innerHTML = '';
 
-            currentSummaries.forEach(summary => {
-                const summaryDiv = document.createElement('div');
-                summaryDiv.className = 'summary-item';
-                summaryDiv.innerHTML = `
+            currentMetadata.forEach(metadata => {
+                const metadataDiv = document.createElement('div');
+                metadataDiv.className = 'summary-item';
+                metadataDiv.innerHTML = `
                     <div class="summary-header">
-                        <div class="summary-title">${summary.originalTitle}</div>
-                        <button class="btn btn-warning" onclick="exportSummary(${summary.id})">Export to Slack</button>
+                        <div class="summary-title">${metadata.title}</div>
                     </div>
-                    <div class="summary-content">${summary.summary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>')}</div>
+                    <div class="summary-content">
+                        <div style="margin-bottom: 10px;"><strong>Date:</strong> ${metadata.date}</div>
+                        <div style="margin-bottom: 10px;"><strong>Website:</strong> ${metadata.website}</div>
+                        <div style="margin-bottom: 10px;"><strong>URL:</strong> <a href="${metadata.url}" target="_blank" style="color: #667eea;">${metadata.url}</a></div>
+                        <div style="margin-bottom: 10px;"><strong>Description:</strong> ${metadata.description}</div>
+                    </div>
                     <div class="summary-meta">
-                        <span>Source: ${summary.source} | Generated: ${new Date(summary.generatedAt).toLocaleString()}</span>
-                        <a href="${summary.originalUrl}" target="_blank" style="color: #667eea;">Read Original</a>
+                        <span>Metadata Preview - Ready to Send</span>
                     </div>
                 `;
-                container.appendChild(summaryDiv);
+                container.appendChild(metadataDiv);
             });
         }
 
@@ -613,77 +615,73 @@
             const container = document.getElementById('feedResults');
             container.innerHTML = '';
 
-            allSummaries.forEach(summary => {
-                const summaryDiv = document.createElement('div');
-                summaryDiv.className = 'summary-item';
-                summaryDiv.innerHTML = `
+            allSentArticles.forEach(article => {
+                const articleDiv = document.createElement('div');
+                articleDiv.className = 'summary-item';
+                articleDiv.innerHTML = `
                     <div class="summary-header">
-                        <div class="summary-title">${summary.originalTitle}</div>
-                        <button class="btn btn-warning" onclick="exportSummary(${summary.id})">Export to Slack</button>
+                        <div class="summary-title">${article.title}</div>
+                        <button class="btn btn-warning" onclick="exportToSlack(${article.id})">Export to Slack</button>
                     </div>
-                    <div class="summary-content">${summary.summary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>')}</div>
+                    <div class="summary-content">
+                        <div style="margin-bottom: 10px;"><strong>Date:</strong> ${article.date}</div>
+                        <div style="margin-bottom: 10px;"><strong>Website:</strong> ${article.website}</div>
+                        <div style="margin-bottom: 10px;"><strong>URL:</strong> <a href="${article.url}" target="_blank" style="color: #667eea;">${article.url}</a></div>
+                        <div style="margin-bottom: 10px;"><strong>Description:</strong> ${article.description}</div>
+                    </div>
                     <div class="summary-meta">
-                        <span>Source: ${summary.source} | Generated: ${new Date(summary.generatedAt).toLocaleString()}</span>
-                        <a href="${summary.originalUrl}" target="_blank" style="color: #667eea;">Read Original</a>
+                        <span>Sent: ${new Date(article.sentAt).toLocaleString()}</span>
                     </div>
                 `;
-                container.appendChild(summaryDiv);
+                container.appendChild(articleDiv);
             });
         }
 
-        // Export individual summary to Slack
-        async function exportSummary(summaryId) {
-            const summary = allSummaries.find(s => s.id === summaryId);
-            if (!summary) return;
+        // Export individual article to Slack
+        async function exportToSlack(articleId) {
+            const article = allSentArticles.find(a => a.id === articleId);
+            if (!article) return;
 
             try {
                 // Simulate Slack export - replace with actual webhook call
-                await mockSlackExport(summary);
-                showSuccess(`Summary exported to Slack successfully!`);
+                await mockSlackExport(article);
+                showSuccess(`Article exported to Slack successfully!`);
             } catch (error) {
                 showError('searchError', 'Failed to export to Slack: ' + error.message);
             }
         }
 
-        // Export all summaries to Slack
-        async function exportAllSummaries() {
-            if (allSummaries.length === 0) {
-                showError('searchError', 'No summaries to export');
+        // Export all articles to Slack
+        async function exportAllToSlack() {
+            if (allSentArticles.length === 0) {
+                showError('searchError', 'No articles to export');
                 return;
             }
 
             try {
                 // Simulate bulk Slack export - replace with actual webhook call
-                await mockBulkSlackExport(allSummaries);
-                showSuccess(`All ${allSummaries.length} summaries exported to Slack successfully!`);
+                await mockBulkSlackExport(allSentArticles);
+                showSuccess(`All ${allSentArticles.length} articles exported to Slack successfully!`);
             } catch (error) {
                 showError('searchError', 'Failed to export to Slack: ' + error.message);
             }
         }
 
+        // Close metadata preview
+        function closePreview() {
+            document.getElementById('metadataSection').style.display = 'none';
+        }
+
         // Mock Slack export - replace with actual webhook integration
-        async function mockSlackExport(summary) {
+        async function mockSlackExport(article) {
             await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('Exporting to Slack:', summary);
+            console.log('Exporting to Slack:', article);
         }
 
         // Mock bulk Slack export - replace with actual webhook integration
-        async function mockBulkSlackExport(summaries) {
+        async function mockBulkSlackExport(articles) {
             await new Promise(resolve => setTimeout(resolve, 1500));
-            console.log('Bulk exporting to Slack:', summaries);
-        }
-
-        // Filter summaries
-        function filterSummaries() {
-            const searchTerm = document.getElementById('summarySearch').value.toLowerCase();
-            const items = document.querySelectorAll('#summaryResults .summary-item');
-            
-            items.forEach(item => {
-                const title = item.querySelector('.summary-title').textContent.toLowerCase();
-                const content = item.querySelector('.summary-content').textContent.toLowerCase();
-                const matches = title.includes(searchTerm) || content.includes(searchTerm);
-                item.style.display = matches ? 'block' : 'none';
-            });
+            console.log('Bulk exporting to Slack:', articles);
         }
 
         // Filter feed
