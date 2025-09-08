@@ -302,6 +302,11 @@
                 <div style="margin-top: 10px; font-size: 0.9rem; color: #6c757d;">
                     💡 <strong>Tip:</strong> Enter company names like "Apple", "Microsoft", "Tesla" to search for real news articles from the last 7 days
                 </div>
+                <div style="margin-top: 10px;">
+                    <button class="btn btn-secondary" onclick="testNewsAPI()" style="font-size: 0.8rem; padding: 8px 16px;">
+                        🧪 Test News API (Apple)
+                    </button>
+                </div>
                 <div class="loading" id="searchLoading">
                     <div class="spinner"></div>
                     <p>Searching for news...</p>
@@ -367,6 +372,13 @@
             SLACK_WEBHOOK_URL: 'YOUR_SLACK_WEBHOOK_URL' // Replace with actual Slack webhook URL
         };
 
+        // Test function to quickly test News API
+        async function testNewsAPI() {
+            console.log('🧪 Testing News API with Apple...');
+            document.getElementById('clientInput').value = 'Apple';
+            await searchNews();
+        }
+
         // Search for news articles
         async function searchNews() {
             const clientName = document.getElementById('clientInput').value.trim();
@@ -381,16 +393,25 @@
             try {
                 // Try real News API first, fallback to mock if not configured
                 let response;
+                console.log('🔧 CONFIG.NEWS_API_KEY:', CONFIG.NEWS_API_KEY);
+                console.log('🔧 API key check:', CONFIG.NEWS_API_KEY && CONFIG.NEWS_API_KEY !== 'YOUR_NEWS_API_KEY');
+                
                 if (CONFIG.NEWS_API_KEY && CONFIG.NEWS_API_KEY !== 'YOUR_NEWS_API_KEY') {
+                    console.log('🚀 Using REAL News API');
                     response = await searchNewsAPI(clientName);
                 } else {
+                    console.log('🎭 Using MOCK News API');
                     response = await mockNewsSearch(clientName);
                 }
                 
+                console.log('📊 Response received:', response);
                 currentNews = response.articles;
+                console.log('📰 Current news set:', currentNews);
+                
                 displayNewsResults();
                 showSection('newsSection');
             } catch (error) {
+                console.error('❌ Search error:', error);
                 showError('searchError', 'Failed to search news: ' + error.message);
             } finally {
                 hideLoading('searchLoading');
@@ -400,56 +421,80 @@
         // Real news search function using News API
         async function searchNewsAPI(query) {
             try {
+                console.log('🔍 Starting News API search for:', query);
+                console.log('🔑 Using API key:', CONFIG.NEWS_API_KEY.substring(0, 8) + '...');
+                
                 // Get articles from the last 7 days
                 const fromDate = new Date();
                 fromDate.setDate(fromDate.getDate() - 7);
                 const fromDateStr = fromDate.toISOString().split('T')[0];
                 
+                console.log('📅 Searching from date:', fromDateStr);
+                
                 // Build search query - search for the company name in title and description
                 const searchQuery = `${query} OR "${query}"`;
+                console.log('🔎 Search query:', searchQuery);
                 
-                const response = await fetch(
-                    `${CONFIG.NEWS_API_URL}?` +
+                const apiUrl = `${CONFIG.NEWS_API_URL}?` +
                     `q=${encodeURIComponent(searchQuery)}&` +
                     `from=${fromDateStr}&` +
                     `sortBy=relevancy&` +
-                    `pageSize=5&` +
+                    `pageSize=1&` +
                     `language=en&` +
-                    `apiKey=${CONFIG.NEWS_API_KEY}`
-                );
+                    `apiKey=${CONFIG.NEWS_API_KEY}`;
+                
+                console.log('🌐 API URL:', apiUrl.replace(CONFIG.NEWS_API_KEY, 'API_KEY_HIDDEN'));
+                
+                const response = await fetch(apiUrl);
+                
+                console.log('📡 Response status:', response.status, response.statusText);
                 
                 if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('❌ API Error Response:', errorText);
                     throw new Error(`News API error: ${response.status} ${response.statusText}`);
                 }
                 
                 const data = await response.json();
+                console.log('📊 API Response:', data);
                 
                 if (data.status !== 'ok') {
+                    console.error('❌ API returned error status:', data);
                     throw new Error(`News API returned error: ${data.message || 'Unknown error'}`);
                 }
                 
+                console.log('📰 Total articles found:', data.totalResults);
+                console.log('📰 Articles in response:', data.articles?.length || 0);
+                
                 // Filter and format the results
                 const articles = data.articles
-                    .filter(article => 
-                        article.title && 
-                        article.description && 
-                        article.url && 
-                        article.publishedAt &&
-                        article.source?.name
-                    )
-                    .slice(0, 5) // Take top 5
-                    .map(article => ({
-                        title: article.title,
-                        description: article.description,
-                        url: article.url,
-                        publishedAt: article.publishedAt,
-                        source: { name: article.source.name }
-                    }));
+                    .filter(article => {
+                        const hasRequiredFields = article.title && 
+                            article.description && 
+                            article.url && 
+                            article.publishedAt &&
+                            article.source?.name;
+                        console.log('✅ Article valid:', hasRequiredFields, article.title);
+                        return hasRequiredFields;
+                    })
+                    .slice(0, 1) // Take just 1 for testing
+                    .map(article => {
+                        const formattedArticle = {
+                            title: article.title,
+                            description: article.description,
+                            url: article.url,
+                            publishedAt: article.publishedAt,
+                            source: { name: article.source.name }
+                        };
+                        console.log('📝 Formatted article:', formattedArticle);
+                        return formattedArticle;
+                    });
                 
+                console.log('🎯 Final articles to return:', articles.length);
                 return { articles };
                 
             } catch (error) {
-                console.error('News API Error:', error);
+                console.error('❌ News API Error:', error);
                 throw new Error(`Failed to fetch news: ${error.message}`);
             }
         }
