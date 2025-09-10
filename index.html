@@ -577,17 +577,21 @@
                 console.log('📡 Response status:', response.status, response.statusText);
                 
                 if (!response.ok) {
+                    // Read the response body only once
+                    const responseText = await response.text();
+                    console.error('❌ Error Response Text:', responseText);
+                    
+                    // Try to parse as JSON, fallback to text if it fails
                     let errorData;
                     try {
-                        errorData = await response.json();
+                        errorData = JSON.parse(responseText);
+                        console.error('❌ Parsed Error Response:', errorData);
+                        throw new Error(`News API error: ${response.status} ${response.statusText} - ${errorData.error || 'Unknown error'}`);
                     } catch (jsonError) {
                         // If response is not JSON (e.g., HTML error page)
-                        const errorText = await response.text();
-                        console.error('❌ Non-JSON Error Response:', errorText);
+                        console.error('❌ Non-JSON Error Response:', responseText);
                         throw new Error(`News API returned non-JSON response: ${response.status} ${response.statusText}. This usually indicates an API key issue or rate limiting.`);
                     }
-                    console.error('❌ Proxy Error Response:', errorData);
-                    throw new Error(`News API error: ${response.status} ${response.statusText} - ${errorData.error || 'Unknown error'}`);
                 }
                 
                 const data = await response.json();
