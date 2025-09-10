@@ -45,6 +45,16 @@ export default async function handler(req, res) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('News API error:', response.status, errorText);
+      
+      // Check if response is HTML (error page) instead of JSON
+      if (errorText.trim().startsWith('<!DOCTYPE') || errorText.trim().startsWith('<html')) {
+        res.status(response.status).json({ 
+          error: `News API returned HTML error page: ${response.status} ${response.statusText}`,
+          details: 'This usually indicates an API key issue, rate limiting, or service unavailable'
+        });
+        return;
+      }
+      
       res.status(response.status).json({ 
         error: `News API error: ${response.status} ${response.statusText}`,
         details: errorText

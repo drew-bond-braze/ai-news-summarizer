@@ -577,7 +577,15 @@
                 console.log('📡 Response status:', response.status, response.statusText);
                 
                 if (!response.ok) {
-                    const errorData = await response.json();
+                    let errorData;
+                    try {
+                        errorData = await response.json();
+                    } catch (jsonError) {
+                        // If response is not JSON (e.g., HTML error page)
+                        const errorText = await response.text();
+                        console.error('❌ Non-JSON Error Response:', errorText);
+                        throw new Error(`News API returned non-JSON response: ${response.status} ${response.statusText}. This usually indicates an API key issue or rate limiting.`);
+                    }
                     console.error('❌ Proxy Error Response:', errorData);
                     throw new Error(`News API error: ${response.status} ${response.statusText} - ${errorData.error || 'Unknown error'}`);
                 }
