@@ -802,10 +802,8 @@
                     "Destination": "Both"
                 }));
 
-                // Send each article as a separate POST request
-                for (const articleData of metadata) {
-                    await sendToTrayAPI(articleData);
-                }
+                // Send all articles as a single array in one POST request
+                await sendToTrayAPI(metadata);
                 
                 // Add to sent articles feed
                 const sentArticles = selectedArticles.map((article, index) => ({
@@ -833,9 +831,9 @@
         }
 
         // Send to Tray API endpoint
-        async function sendToTrayAPI(articleData) {
+        async function sendToTrayAPI(articlesArray) {
             // Log the exact format being sent
-            console.log('Sending POST request to Tray API with data:', JSON.stringify(articleData, null, 2));
+            console.log('Sending POST request to Tray API with data:', JSON.stringify(articlesArray, null, 2));
             console.log('Using API URL:', CONFIG.THIRD_PARTY_API_URL);
             
             try {
@@ -847,7 +845,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(articleData)
+                    body: JSON.stringify(articlesArray)
                 });
                 
                 if (!response.ok) {
