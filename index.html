@@ -814,10 +814,12 @@
                     "Destination": "Both"
                 }));
 
-                // Send all articles as a single array in one POST request
-                console.log('🚀 About to send', metadata.length, 'articles in ONE API call');
-                console.log('📦 Payload will be an array:', Array.isArray(metadata));
-                await sendToTrayAPI(metadata);
+                // Send each article as a separate POST request
+                console.log('🚀 About to send', metadata.length, 'articles in', metadata.length, 'separate API calls');
+                for (const articleData of metadata) {
+                    console.log('📤 Sending individual article:', articleData['Article Title']);
+                    await sendToTrayAPI(articleData);
+                }
                 
                 // Add to sent articles feed
                 const sentArticles = selectedArticles.map((article, index) => ({
@@ -845,9 +847,9 @@
         }
 
         // Send to Tray API endpoint
-        async function sendToTrayAPI(articlesArray) {
+        async function sendToTrayAPI(articleData) {
             // Log the exact format being sent
-            console.log('Sending POST request to Tray API with data:', JSON.stringify(articlesArray, null, 2));
+            console.log('Sending POST request to Tray API with data:', JSON.stringify(articleData, null, 2));
             console.log('Using API URL:', CONFIG.THIRD_PARTY_API_URL);
             
             try {
@@ -859,7 +861,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(articlesArray)
+                    body: JSON.stringify(articleData)
                 });
                 
                 if (!response.ok) {
