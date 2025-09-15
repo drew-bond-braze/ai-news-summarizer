@@ -815,6 +815,8 @@
                 }));
 
                 // Send all articles as a single array in one POST request
+                console.log('🚀 About to send', metadata.length, 'articles in ONE API call');
+                console.log('📦 Payload will be an array:', Array.isArray(metadata));
                 await sendToTrayAPI(metadata);
                 
                 // Add to sent articles feed
