@@ -623,7 +623,8 @@
                             description: article.description,
                             url: article.url,
                             publishedAt: article.publishedAt,
-                            source: { name: article.source.name }
+                            source: { name: article.source.name },
+                            urlToImage: article.urlToImage
                         };
                         console.log('📝 Formatted article:', formattedArticle);
                         return formattedArticle;
@@ -659,35 +660,40 @@
                         description: `The company unveiled its next-generation customer engagement suite featuring advanced AI algorithms that deliver personalized experiences at scale. The platform integrates machine learning with behavioral analytics to predict customer needs and optimize engagement strategies across all touchpoints.`,
                         url: 'https://example.com/news1',
                         publishedAt: dates[0], // Today
-                        source: { name: 'TechCrunch' }
+                        source: { name: 'TechCrunch' },
+                        urlToImage: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=200&fit=crop&crop=center'
                     },
                     {
                         title: `${query} reports 45% revenue growth in Q4 2023, driven by enterprise AI adoption`,
                         description: `Strong quarterly performance highlights the company's successful pivot to AI-driven solutions. Enterprise customers are increasingly adopting their platform for customer engagement, with average deal sizes increasing by 60% year-over-year. The company also announced expansion into European markets.`,
                         url: 'https://example.com/news2',
                         publishedAt: dates[1], // Yesterday
-                        source: { name: 'Business Wire' }
+                        source: { name: 'Business Wire' },
+                        urlToImage: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=200&fit=crop&crop=center'
                     },
                     {
                         title: `${query} secures $50M Series C funding to accelerate AI innovation and global expansion`,
                         description: `The funding round, led by prominent venture capital firms, will fuel research and development in artificial intelligence, machine learning, and customer engagement technologies. The company plans to double its engineering team and expand into Asia-Pacific markets.`,
                         url: 'https://example.com/news3',
                         publishedAt: dates[2], // 2 days ago
-                        source: { name: 'VentureBeat' }
+                        source: { name: 'VentureBeat' },
+                        urlToImage: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&h=200&fit=crop&crop=center'
                     },
                     {
                         title: `${query} announces strategic partnership with Microsoft Azure for enhanced cloud scalability`,
                         description: `The partnership will provide customers with improved performance, global reach, and enterprise-grade security. The integration allows seamless deployment of customer engagement solutions on Azure infrastructure, with built-in compliance and data residency options.`,
                         url: 'https://example.com/news4',
                         publishedAt: dates[3], // 3 days ago
-                        source: { name: 'PR Newswire' }
+                        source: { name: 'PR Newswire' },
+                        urlToImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=200&fit=crop&crop=center'
                     },
                     {
                         title: `${query} recognized as "Best Customer Engagement Platform" at 2024 MarTech Awards`,
                         description: `The company received industry recognition for its innovative approach to customer engagement and AI-driven personalization. The award highlights their commitment to helping businesses build meaningful relationships with customers through technology.`,
                         url: 'https://example.com/news5',
                         publishedAt: dates[4], // 4 days ago
-                        source: { name: 'MarTech Today' }
+                        source: { name: 'MarTech Today' },
+                        urlToImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=200&fit=crop&crop=center'
                     }
                 ]
             };
@@ -702,13 +708,28 @@
                 const articleDiv = document.createElement('div');
                 articleDiv.className = 'news-item';
                 
-                // Create a simple icon/logo from the first letter of the source
+                // Create a better preview - either article image or enhanced text preview
                 const sourceInitial = article.source.name.charAt(0).toUpperCase();
+                const hasImage = article.urlToImage && article.urlToImage !== 'null' && article.urlToImage.trim() !== '';
+                
+                let imageContent;
+                if (hasImage) {
+                    imageContent = `<img src="${article.urlToImage}" alt="${article.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">`;
+                } else {
+                    // Enhanced text preview with source initial and first few words of title
+                    const titleWords = article.title.split(' ').slice(0, 3).join(' ');
+                    imageContent = `
+                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center;">
+                            <div style="font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem; opacity: 0.9;">${sourceInitial}</div>
+                            <div style="font-size: 0.8rem; font-weight: 600; line-height: 1.2; opacity: 0.8; padding: 0 0.5rem;">${titleWords}</div>
+                        </div>
+                    `;
+                }
                 
                 articleDiv.innerHTML = `
                     <input type="checkbox" class="news-checkbox" onchange="updateSelectedCount()" data-index="${index}">
                     <div class="card-image">
-                        ${sourceInitial}
+                        ${imageContent}
                     </div>
                     <div class="card-content">
                         <div class="card-meta">
